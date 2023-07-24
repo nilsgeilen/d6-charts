@@ -19,7 +19,7 @@ def chart(title, data: Dict[int, float], xlabel=None):
     plt.close()
 
 
-def multi_chart(title, data: Dict[str, Dict[int, float]], bar=False, ylabel='chance [%]'):
+def multi_chart(title, data: Dict[str, Dict[int, float]], bar=False, ylabel='chance [%]', xlabel=None):
     plt.figure(figsize=(7, 4))
     all_xvals = [key for series in data.values() for key in series.keys()]
     plt.xticks(range(min(all_xvals), max(all_xvals) + 1))
@@ -36,6 +36,8 @@ def multi_chart(title, data: Dict[str, Dict[int, float]], bar=False, ylabel='cha
             plt.plot(xvals, yvals, label=label, linewidth=3, marker='o')
 
     plt.ylabel(ylabel)
+    if xlabel:
+        plt.xlabel(xlabel)
     plt.title(title)
     plt.legend()
     plt.savefig(os.path.join('repo', title), dpi=200)
@@ -129,11 +131,11 @@ chart('Π(2 d6)', percentage(lambda l: l[0] * l[1], combine(2)))
 for i in range(1, 7):
     multi_chart(f'Probability of Hits with {i} d6',
                 {f'{threshold}+, μ = {round(expected_value(percentage), 1)}': percentage for threshold, percentage in
-                 [(k, percentage(hits(k), combine(i))) for k in range(2, 7)]})
+                 [(k, percentage(hits(k), combine(i))) for k in range(2, 7)]}, xlabel='hits')
 
     multi_chart(f'Cumulative Probability of Hits with {i} d6',
                 {f'{threshold}+': cumulative(percentage(hits(threshold), combine(i))) for threshold in range(2, 7)},
-                ylabel='cumulative chance [%]')
+                ylabel='cumulative chance [%]', xlabel='hits')
 
     for threshold in range(2, 7):
         c5d6e = explosive_die(threshold, 7)
@@ -144,9 +146,9 @@ for i in range(1, 7):
     mu2 = round(expected_value(p2), 1)
     data = {f'{threshold}+, μ = {mu1}': p1,
             f'{threshold}+ explosive, μ = {mu2}': prune_percentage(p2)}
-    multi_chart(f'Probability of Hits with {i} d6 ({threshold}+)', data, bar=True)
+    multi_chart(f'Probability of Hits with {i} d6 ({threshold}+)', data, bar=True, xlabel='hits')
 
 for i in range(2, 7):
     multi_chart(f'Probability of Hits with n d6 ({i}+)',
                 {f'{n} d6, μ = {round(expected_value(percentage), 1)}': percentage for n, percentage in
-                 [(n, percentage(hits(i), combine(n))) for n in range(1, 7)]})
+                 [(n, percentage(hits(i), combine(n))) for n in range(1, 7)]}, xlabel='hits')
